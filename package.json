@@ -1,0 +1,19 @@
+{
+  "name": "check-for-tickets",
+  "version": "1.0.0",
+  "description": "Check if tickets are available!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marfb/check-for-tickets.git"
+  },
+  "author": "mfbdev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marfb/check-for-tickets/issues"
+  },
+  "homepage": "https://github.com/marfb/check-for-tickets#readme"
+}
