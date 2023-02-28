@@ -8,10 +8,10 @@ You must have a Twilio account for this app to work. If you don´t have one, at 
 
 ## How to use it
 
-1 - Create your twilio account following instruction at this [link](https://www.twilio.com/try-twilio)
-2 - After creating your account edit `template.CONFIG.js` file with the data from your twilio account.
-3 - Rename `template.CONFIG.js` to `CONFIG.js`. Remember to keep this file ignored at `.gitignore` to keep your credentials secure.
-4 - In terminal execute `npm run start`. Done.
+1. Create your twilio account following instruction at this [link](https://www.twilio.com/try-twilio)
+2. After creating your account edit `template.CONFIG.js` file with the data from your twilio account.
+3. Rename `template.CONFIG.js` to `CONFIG.js`. Remember to keep this file ignored at `.gitignore` to keep your credentials secure.
+4. In terminal execute `npm run start`. Done.
 
 ## Version 1.0.0
 
