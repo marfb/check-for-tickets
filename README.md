@@ -5,17 +5,17 @@ The idea behind this project is to set an automated process to check if your eve
 ## Pre-requisites
 
 You must have a Twilio account for this app to work. If you don´t have one, at the _How to use it_ section you'll find a link to create one for free.
-You'll need access to a SMTP server in order to be notified in case the element you are looking for appears no more. This is to alert you and check if the markup of the scrapped page has changed.
-Also this app is meant to run in your own old laptop with PM2 or just by executing the script in your terminal or any other similar way that may exist now or in the future.
+Also access to an slack app endpoint to warn in case the element you are looking for appears no more. This is to alert you and check if the markup of the scrapped page has changed.
+This app is meant to run in your own old laptop with PM2 or just by executing the script in your terminal or any other similar way that may exist now or in the future.
 
 ## How to use it
 
 1. Create your twilio account following instruction at this [link](https://www.twilio.com/try-twilio)
-2. After creating your account edit `template.CONFIG.js` file with the data from your twilio account and your SMTP host.
+2. After creating your account edit `template.CONFIG.js` file with the data from your twilio account and your Slack app endpoint.
 3. Rename `template.CONFIG.js` to `CONFIG.js`.
 4. In terminal execute `npm run start`. Done.
 
-## Version 1.0.0
+## Version 1.1.0
 
 At the moment this project is configured to search for tickets for Argentina - Panama match that will be available at autoentrada.com. In the future, configuration file will let you set:
 
