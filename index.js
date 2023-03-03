@@ -66,12 +66,9 @@ const performScraping = async () => {
         console.log(message.sid);
       });
     await axios
-      .post(
-        "https://hooks.slack.com/services/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",
-        {
-          text: "Ya están las entradas!!!",
-        }
-      )
+      .post(SLACK_APP_URL, {
+        text: "Ya están las entradas!!!",
+      })
       .then(() => {
         notifSent = true;
       })
@@ -85,6 +82,10 @@ const performScraping = async () => {
 };
 
 const process = setInterval(
-  () => performScraping().then(console.log(`executed ${timesExecuted} times`)),
+  () =>
+    performScraping().then(() => {
+      const now = Date.now();
+      console.log(`executed ${timesExecuted} times at ${new Date(now)}`);
+    }),
   10000
 );
