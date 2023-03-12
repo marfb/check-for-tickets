@@ -9,10 +9,31 @@ let notifSent = false;
 let smsSent = false;
 let timesExecuted = 1;
 
-const performScraping = async () => {
+const sites = [
+  {
+    site: "deportik",
+    url: "https://www.deportick.com/",
+    selector: ".home-events .event-thumb > a",
+    count: 8,
+  },
+  {
+    site: "autoentrada/deporte",
+    url: "https://ventas.autoentrada.com/t/deporte",
+    selector: ".container.marketing div.evento > a",
+    count: 1,
+  },
+  {
+    site: "autoentrada",
+    url: "https://ventas.autoentrada.com/",
+    selector: ".container.marketing div.evento > a",
+    count: 42,
+  },
+];
+
+const performScraping = async ({ url, selector, count }) => {
   const axiosResponse = await axios.request({
     method: "GET",
-    url: "https://ventas.autoentrada.com/t/deporte",
+    url: url,
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
@@ -20,11 +41,11 @@ const performScraping = async () => {
   });
 
   const $ = cheerio.load(axiosResponse.data);
-  const eventCards = $(".container.marketing div.evento a h2");
+  const eventCards = $(selector);
 
   timesExecuted += 1;
   if (smsSent) {
-    console.log("process done");
+    console.log("process stopped");
     clearInterval(process);
   }
 
@@ -47,9 +68,9 @@ const performScraping = async () => {
   let notify = false;
 
   eventCards.each((_, event) => {
-    const eventTitle = $(event).text();
+    const eventUrl = $(event)[0].attribs.href;
 
-    if (eventTitle.includes("anam")) {
+    if (eventUrl.includes("anam")) {
       notify = true;
     }
   });
@@ -57,7 +78,7 @@ const performScraping = async () => {
   if (notify && !smsSent) {
     await client.messages
       .create({
-        body: "Entradas a la venta!",
+        body: `Entradas a la venta! ${url}`,
         from: `${FROM_NUMBER}`,
         to: `${TO_NUMBER}`,
       })
@@ -67,7 +88,23 @@ const performScraping = async () => {
       });
     await axios
       .post(SLACK_APP_URL, {
-        text: "Ya están las entradas!!!",
+        text: `Entradas! ${url}`,
+      })
+      .then(() => {
+        notifSent = true;
+      })
+      .catch((e) => {
+        console.log("post error ->", e);
+      })
+      .finally(() => {
+        notifSent = true;
+      });
+  }
+
+  if (eventCards.length !== count) {
+    await axios
+      .post(SLACK_APP_URL, {
+        text: `Cambio cantidad en: ${url}`,
       })
       .then(() => {
         notifSent = true;
@@ -81,11 +118,18 @@ const performScraping = async () => {
   }
 };
 
-const process = setInterval(
-  () =>
-    performScraping().then(() => {
+const process = setInterval(() => {
+  sites.forEach((siteData) => {
+    performScraping(siteData).then(() => {
       const now = Date.now();
-      console.log(`executed ${timesExecuted} times at ${new Date(now)}`);
-    }),
-  10000
-);
+      console.log(
+        `        ******
+        Scrapper executed ${timesExecuted} times.
+        Last at ${new Date(now)}
+        Url: ${siteData.site}
+        ******
+        `
+      );
+    });
+  });
+}, 10000);
