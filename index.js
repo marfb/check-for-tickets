@@ -5,9 +5,10 @@ const { ACCOUNT_SID, AUTH_TOKEN, FROM_NUMBER, TO_NUMBER, SLACK_APP_URL } =
   constants;
 const client = require("twilio")(ACCOUNT_SID, AUTH_TOKEN);
 
-let notifSent = false;
-let smsSent = false;
-let timesExecuted = 1;
+let markupChanged = false;
+let eventCountChanged = false;
+let ticketsAvailable = false;
+let timesExecuted = 0;
 
 const sites = [
   {
@@ -20,13 +21,13 @@ const sites = [
     site: "autoentrada/deporte",
     url: "https://ventas.autoentrada.com/t/deporte",
     selector: ".container.marketing div.evento > a",
-    count: 1,
+    count: 0,
   },
   {
     site: "autoentrada",
     url: "https://ventas.autoentrada.com/",
     selector: ".container.marketing div.evento > a",
-    count: 42,
+    count: 43,
   },
 ];
 
@@ -44,38 +45,38 @@ const performScraping = async ({ url, selector, count }) => {
   const eventCards = $(selector);
 
   timesExecuted += 1;
-  if (smsSent) {
-    console.log("process stopped");
+  if (ticketsAvailable) {
+    console.log("Process stopped - tickets available");
     clearInterval(process);
   }
 
-  if (eventCards.length < 1 && !notifSent) {
+  if (eventCards.length < 1 && !markupChanged) {
     await axios
       .post(SLACK_APP_URL, {
-        text: "No hay mas eventos deportivos o cambio el markup!",
+        text: `No hay mas eventos o cambio el markup! ${url}`,
       })
       .then(() => {
-        notifSent = true;
+        markupChanged = true;
       })
       .catch((e) => {
         console.log("post error ->", e);
       })
       .finally(() => {
-        notifSent = true;
+        markupChanged = true;
       });
   }
 
   let notify = false;
 
   eventCards.each((_, event) => {
-    const eventUrl = $(event)[0].attribs.href;
+    const { href = "" } = $(event)[0].attribs;
 
-    if (eventUrl.includes("anam")) {
+    if (href.includes("anam")) {
       notify = true;
     }
   });
 
-  if (notify && !smsSent) {
+  if (notify && !ticketsAvailable) {
     await client.messages
       .create({
         body: `Entradas a la venta! ${url}`,
@@ -83,37 +84,37 @@ const performScraping = async ({ url, selector, count }) => {
         to: `${TO_NUMBER}`,
       })
       .then((message) => {
-        smsSent = true;
+        ticketsAvailable = true;
         console.log(message.sid);
       });
     await axios
       .post(SLACK_APP_URL, {
-        text: `Entradas! ${url}`,
+        text: `Entradas a la venta! ${url}`,
       })
       .then(() => {
-        notifSent = true;
+        ticketsAvailable = true;
       })
       .catch((e) => {
         console.log("post error ->", e);
       })
       .finally(() => {
-        notifSent = true;
+        ticketsAvailable = true;
       });
   }
 
-  if (eventCards.length !== count) {
+  if (eventCards.length !== count && !eventCountChanged) {
     await axios
       .post(SLACK_APP_URL, {
-        text: `Cambio cantidad en: ${url}`,
+        text: `Cambio cantidad de eventos en: ${url}. New count: ${eventCards.length}`,
       })
       .then(() => {
-        notifSent = true;
+        eventCountChanged = true;
       })
       .catch((e) => {
         console.log("post error ->", e);
       })
       .finally(() => {
-        notifSent = true;
+        eventCountChanged = true;
       });
   }
 };
